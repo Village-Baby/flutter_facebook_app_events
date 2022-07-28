@@ -9,11 +9,11 @@ class FacebookAppEvents {
   static const _channel = MethodChannel(channelName);
 
   // See: https://github.com/facebook/facebook-android-sdk/blob/master/facebook-core/src/main/java/com/facebook/appevents/AppEventsConstants.java
-  static const eventNameCompletedRegistration =
-      'fb_mobile_complete_registration';
+  static const eventNameCompletedRegistration = 'fb_mobile_complete_registration';
   static const eventNameViewedContent = 'fb_mobile_content_view';
   static const eventNameRated = 'fb_mobile_rate';
   static const eventNameInitiatedCheckout = 'fb_mobile_initiated_checkout';
+  static const eventNamePurchase = 'fb_mobile_purchase';
   static const eventNameAddedToCart = 'fb_mobile_add_to_cart';
   static const eventNameAddedToWishlist = 'fb_mobile_add_to_wishlist';
   static const eventNameSubscribe = "Subscribe";
@@ -40,6 +40,12 @@ class FacebookAppEvents {
   /// Example:
   ///   "[{\"id\": \"1234\", \"quantity\": 2, \"item_price\": 5.99}, {\"id\": \"5678\", \"quantity\": 1, \"item_price\": 9.99}]"
   static const paramNameContent = "fb_content";
+  static const paramNameContentProductName = "fb_content_product_name";
+  static const paramNameContentBrandName = "fb_content_brand_name";
+  static const paramNameContentOptionNo = "fb_content_option_no";
+  static const paramNameContentEventName = "fb_content_event_name";
+  static const paramNameContentEventNameQuantity = "fb_content_product_quantity";
+  static const paramNameContentEventNamePrice = "fb_content_product_price";
 
   /// Parameter key used to specify an ID for the specific piece of content being logged about.
   /// This could be an EAN, article identifier, etc., depending on the nature of the app.
@@ -169,6 +175,9 @@ class FacebookAppEvents {
   Future<void> logViewContent({
     Map<String, dynamic>? content,
     String? id,
+    required String productName,
+    required String brandName,
+    String? eventName,
     String? type,
     String? currency,
     double? price,
@@ -180,6 +189,9 @@ class FacebookAppEvents {
         paramNameContentId: id,
         paramNameContentType: type,
         paramNameCurrency: currency,
+        paramNameContentProductName: productName,
+        paramNameContentBrandName: brandName,
+        paramNameContentEventName: eventName,
       },
       valueToSum: price,
     );
@@ -191,6 +203,10 @@ class FacebookAppEvents {
   Future<void> logAddToCart({
     Map<String, dynamic>? content,
     required String id,
+    required String productName,
+    required String brandName,
+    required String optionNo,
+    String? eventName,
     required String type,
     required String currency,
     required double price,
@@ -202,6 +218,10 @@ class FacebookAppEvents {
         paramNameContentId: id,
         paramNameContentType: type,
         paramNameCurrency: currency,
+        paramNameContentProductName: productName,
+        paramNameContentBrandName: brandName,
+        paramNameContentOptionNo: optionNo,
+        paramNameContentEventName: eventName,
       },
       valueToSum: price,
     );
@@ -255,17 +275,38 @@ class FacebookAppEvents {
     return _channel.invokeMethod<void>('setDataProcessingOptions', args);
   }
 
+  /// Each Item should include 'itemId', 'itemName', 'itemBrand', 'promotionName', 'quantity', 'price'
   Future<void> logPurchase({
     required double amount,
     required String currency,
-    Map<String, dynamic>? parameters,
+    required List<Map<String, dynamic>> items,
   }) {
-    final args = <String, dynamic>{
-      'amount': amount,
-      'currency': currency,
-      'parameters': parameters,
-    };
-    return _channel.invokeMethod<void>('logPurchase', _filterOutNulls(args));
+    // final args = <String, dynamic>{
+    //   'amount': amount,
+    //   'currency': currency,
+    //   'parameters': items,
+    // };
+    // return _channel.invokeMethod<void>('logPurchase', _filterOutNulls(args));
+    return logEvent(
+      name: eventNamePurchase,
+      valueToSum: amount,
+      parameters: {
+        paramNameNumItems: items.length,
+        paramNameContent: [
+          for (Map<String, dynamic> item in items)
+            {
+              {
+                paramNameContentId: item['itemId'],
+                paramNameContentProductName: item['itemName'],
+                paramNameContentBrandName: item['itemBrand'],
+                paramNameContentEventName: item['promotionName'],
+                paramNameContentEventNameQuantity: item['quantity'],
+                paramNameContentEventNamePrice: item['price'],
+              }
+            }
+        ],
+      },
+    );
   }
 
   Future<void> logInitiatedCheckout({
@@ -284,8 +325,7 @@ class FacebookAppEvents {
         paramNameContentId: contentId,
         paramNameNumItems: numItems,
         paramNameCurrency: currency,
-        paramNamePaymentInfoAvailable:
-            paymentInfoAvailable ? paramValueYes : paramValueNo,
+        paramNamePaymentInfoAvailable: paymentInfoAvailable ? paramValueYes : paramValueNo,
       },
     );
   }
