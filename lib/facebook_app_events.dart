@@ -287,18 +287,18 @@ class FacebookAppEvents {
       'parameters': {
         paramNameNumItems: items.length,
         paramNameContent: items
-            .map((e) => _filterOutNulls({
+            .map((e) => {
                   'paramNameContentId': e['itemId'],
                   'paramNameContentProductName': e['itemName'],
                   'paramNameContentBrandName': e['itemBrand'],
                   'paramNameContentEventName': e['promotionName'],
                   'paramNameContentEventNameQuantity': e['quantity'],
                   'paramNameContentEventNamePrice': e['price'],
-                }))
+                })
             .toList(),
       },
     };
-    return _channel.invokeMethod<void>('logPurchase', _filterOutNulls(args));
+    return _channel.invokeMethod<void>('logPurchase', args);
   }
 
   Future<void> logInitiatedCheckout({
