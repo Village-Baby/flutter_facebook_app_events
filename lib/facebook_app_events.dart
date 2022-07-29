@@ -294,19 +294,16 @@ class FacebookAppEvents {
           'currency': currency,
           'parameters': {
             paramNameNumItems: items.length,
-            paramNameContent: [
-              for (Map<String, dynamic> item in items)
-                {
-                  {
-                    paramNameContentId: item['itemId'],
-                    paramNameContentProductName: item['itemName'],
-                    paramNameContentBrandName: item['itemBrand'],
-                    paramNameContentEventName: item['promotionName'],
-                    paramNameContentEventNameQuantity: item['quantity'],
-                    paramNameContentEventNamePrice: item['price'],
-                  }
-                }
-            ],
+            paramNameContent: List.generate(
+                items.length,
+                (i) => <String, dynamic>{
+                      'paramNameContentId': items[i]['itemId'],
+                      'paramNameContentProductName': items[i]['itemName'],
+                      'paramNameContentBrandName': items[i]['itemBrand'],
+                      'paramNameContentEventName': items[i]['promotionName'],
+                      'paramNameContentEventNameQuantity': items[i]['quantity'],
+                      'paramNameContentEventNamePrice': items[i]['price'],
+                    }),
           }
         }));
   }
