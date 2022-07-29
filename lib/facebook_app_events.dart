@@ -287,26 +287,28 @@ class FacebookAppEvents {
     //   'parameters': items,
     // };
     // return _channel.invokeMethod<void>('logPurchase', _filterOutNulls(args));
-    return logEvent(
-      name: eventNamePurchase,
-      valueToSum: amount,
-      parameters: {
-        paramNameNumItems: items.length,
-        paramNameContent: [
-          for (Map<String, dynamic> item in items)
-            {
-              {
-                paramNameContentId: item['itemId'],
-                paramNameContentProductName: item['itemName'],
-                paramNameContentBrandName: item['itemBrand'],
-                paramNameContentEventName: item['promotionName'],
-                paramNameContentEventNameQuantity: item['quantity'],
-                paramNameContentEventNamePrice: item['price'],
-              }
-            }
-        ],
-      },
-    );
+    return _channel.invokeMethod<void>(
+        'logPurchase',
+        _filterOutNulls({
+          'amount': amount,
+          'currency': currency,
+          'parameters': {
+            paramNameNumItems: items.length,
+            paramNameContent: [
+              for (Map<String, dynamic> item in items)
+                {
+                  {
+                    paramNameContentId: item['itemId'],
+                    paramNameContentProductName: item['itemName'],
+                    paramNameContentBrandName: item['itemBrand'],
+                    paramNameContentEventName: item['promotionName'],
+                    paramNameContentEventNameQuantity: item['quantity'],
+                    paramNameContentEventNamePrice: item['price'],
+                  }
+                }
+            ],
+          }
+        }));
   }
 
   Future<void> logInitiatedCheckout({
