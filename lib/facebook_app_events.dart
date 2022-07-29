@@ -281,31 +281,24 @@ class FacebookAppEvents {
     required String currency,
     required List<Map<String, dynamic>> items,
   }) {
-    // final args = <String, dynamic>{
-    //   'amount': amount,
-    //   'currency': currency,
-    //   'parameters': items,
-    // };
-    // return _channel.invokeMethod<void>('logPurchase', _filterOutNulls(args));
-    return _channel.invokeMethod<void>(
-        'logPurchase',
-        _filterOutNulls({
-          'amount': amount,
-          'currency': currency,
-          'parameters': {
-            paramNameNumItems: items.length,
-            paramNameContent: List.generate(
-                items.length,
-                (i) => <String, dynamic>{
-                      'paramNameContentId': items[i]['itemId'],
-                      'paramNameContentProductName': items[i]['itemName'],
-                      'paramNameContentBrandName': items[i]['itemBrand'],
-                      'paramNameContentEventName': items[i]['promotionName'],
-                      'paramNameContentEventNameQuantity': items[i]['quantity'],
-                      'paramNameContentEventNamePrice': items[i]['price'],
-                    }),
-          }
-        }));
+    final args = <String, dynamic>{
+      'amount': amount,
+      'currency': currency,
+      'parameters': {
+        paramNameNumItems: items.length,
+        paramNameContent: items
+            .map((e) => _filterOutNulls({
+                  'paramNameContentId': e['itemId'],
+                  'paramNameContentProductName': e['itemName'],
+                  'paramNameContentBrandName': e['itemBrand'],
+                  'paramNameContentEventName': e['promotionName'],
+                  'paramNameContentEventNameQuantity': e['quantity'],
+                  'paramNameContentEventNamePrice': e['price'],
+                }))
+            .toList(),
+      },
+    };
+    return _channel.invokeMethod<void>('logPurchase', _filterOutNulls(args));
   }
 
   Future<void> logInitiatedCheckout({
