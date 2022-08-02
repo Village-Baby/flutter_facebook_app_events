@@ -167,6 +167,23 @@ class FacebookAppEventsPlugin: FlutterPlugin, MethodCallHandler {
       } else if (value is Map<*, *>) {
         val nestedBundle = createBundleFromMap(value as Map<String, Any>)
         bundle.putBundle(key, nestedBundle as Bundle)
+      } else if (value instanceof Iterable<*>) {
+        ArrayList<Parcelable> list = new ArrayList<>();
+
+        for (Object item : (Iterable<*>) value) {
+          if (item instanceof Map) {
+            //noinspection unchecked
+            list.add(createBundleFromMap((Map<String, Object>) item));
+          } else {
+            throw new IllegalArgumentException(
+                "Unsupported value type: "
+                    + item.getClass().getCanonicalName()
+                    + " in list at key "
+                    + key);
+          }
+        }
+
+        bundle.putParcelableArrayList(key, list);
       } else {
         throw IllegalArgumentException(
             "Unsupported value type: " + value.javaClass.kotlin)
