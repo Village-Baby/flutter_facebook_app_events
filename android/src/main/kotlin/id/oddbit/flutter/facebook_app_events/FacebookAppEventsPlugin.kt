@@ -3,6 +3,7 @@ package id.oddbit.flutter.facebook_app_events
 import androidx.annotation.NonNull
 
 import android.os.Bundle
+import android.os.Parcelable
 import android.util.Log
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
@@ -167,14 +168,13 @@ class FacebookAppEventsPlugin: FlutterPlugin, MethodCallHandler {
       } else if (value is Map<*, *>) {
         val nestedBundle = createBundleFromMap(value as Map<String, Any>)
         bundle.putBundle(key, nestedBundle as Bundle)
-      } else if (value instanceof Iterable<*>) {
-        val list = new ArrayList<>();
-
-        for (item in (Iterable<*>) value) {
-          list.add(createBundleFromMap(item as Map<String, Any>))
+      } else if (value is Iterable<*>) {
+        val arrListStr = ArrayList<Any?>()
+        val iterator = value.iterator()
+        while (iterator.hasNext()) {
+          arrListStr.add(iterator.next())
         }
-
-        bundle.putBundle(key, nestedBundle as Bundle)
+        bundle.putParcelableArrayList(key, arrListStr as ArrayList<out Parcelable>)
       } else {
         throw IllegalArgumentException(
             "Unsupported value type: " + value.javaClass.kotlin)

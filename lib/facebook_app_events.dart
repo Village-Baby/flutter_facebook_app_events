@@ -286,16 +286,16 @@ class FacebookAppEvents {
       'currency': currency,
       'parameters': {
         paramNameNumItems: items.length,
-        paramNameContent: items
-            .map((e) => {
-                  'paramNameContentId': e['itemId'],
-                  'paramNameContentProductName': e['itemName'],
-                  'paramNameContentBrandName': e['itemBrand'],
-                  'paramNameContentEventName': e['promotionName'],
-                  'paramNameContentEventNameQuantity': e['quantity'],
-                  'paramNameContentEventNamePrice': e['price'],
-                })
-            .toList(),
+        paramNameContent: utf8.decode(JsonUtf8Encoder().convert(items
+            .map((e) => _filterOutNulls({
+                  paramNameContentId: e['itemId'],
+                  paramNameContentProductName: e['itemName'],
+                  paramNameContentBrandName: e['itemBrand'],
+                  paramNameContentEventName: e['promotionName'],
+                  paramNameContentEventNameQuantity: e['quantity'],
+                  paramNameContentEventNamePrice: e['price'],
+                }))
+            .toList())),
       },
     };
     return _channel.invokeMethod<void>('logPurchase', args);
