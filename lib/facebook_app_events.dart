@@ -279,24 +279,30 @@ class FacebookAppEvents {
   Future<void> logPurchase({
     required double amount,
     required String currency,
-    required List<Map<String, dynamic>> items,
+    List<Map<String, dynamic>>? items,
   }) {
     final args = <String, dynamic>{
       'amount': amount,
       'currency': currency,
-      'parameters': {
-        paramNameNumItems: items.length,
-        paramNameContent: utf8.decode(JsonUtf8Encoder().convert(items
-            .map((e) => _filterOutNulls({
-                  paramNameContentId: e['itemId'],
-                  paramNameContentProductName: e['itemName'],
-                  paramNameContentBrandName: e['itemBrand'],
-                  paramNameContentEventName: e['promotionName'],
-                  paramNameContentEventNameQuantity: e['quantity'],
-                  paramNameContentEventNamePrice: e['price'],
-                }))
-            .toList())),
-      },
+      // 'parameters': {
+      //   paramNameNumItems: items.length,
+      //   paramNameContentId: items.map((e) => e['itemId']).toList(),
+      //   paramNameContentProductName: items.map((e) => e['itemName']).toList(),
+      //   paramNameContentBrandName: items.map((e) => e['itemBrand']).toList(),
+      //   paramNameContentEventName: items.map((e) => e['promotionName']).toList(),
+      //   paramNameContentEventNameQuantity: items.map((e) => e['quantity']).toList(),
+      //   paramNameContentEventNamePrice: items.map((e) => e['price']).toList(),
+      //   // paramNameContent: items
+      //   //     .map((e) => {
+      //   //           'paramNameContentId': e['itemId'],
+      //   //           'paramNameContentProductName': e['itemName'],
+      //   //           'paramNameContentBrandName': e['itemBrand'],
+      //   //           'paramNameContentEventName': e['promotionName'],
+      //   //           'paramNameContentEventNameQuantity': e['quantity'],
+      //   //           'paramNameContentEventNamePrice': e['price'],
+      //   //         })
+      //   //     .toList(),
+      // },
     };
     return _channel.invokeMethod<void>('logPurchase', args);
   }
